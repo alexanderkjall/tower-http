@@ -486,16 +486,19 @@ mod tests {
     use std::{
         convert::Infallible,
         sync::{
-            atomic::{AtomicU64, Ordering},
+            atomic::Ordering,
             Arc,
         },
     };
+    #[cfg(target_has_atomic = "64")]
+    use std::sync::atomic::AtomicU64;
     use tower::{ServiceBuilder, ServiceExt};
 
     #[allow(unused_imports)]
     use super::*;
 
     #[tokio::test]
+    #[cfg(target_has_atomic = "64")]
     async fn basic() {
         let svc = ServiceBuilder::new()
             .set_x_request_id(Counter::default())
@@ -526,6 +529,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(target_has_atomic = "64")]
     async fn other_middleware_setting_request_id() {
         let svc = ServiceBuilder::new()
             .override_request_header(
@@ -554,6 +558,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(target_has_atomic = "64")]
     async fn other_middleware_setting_request_id_on_response() {
         let svc = ServiceBuilder::new()
             .set_x_request_id(Counter::default())
@@ -574,8 +579,10 @@ mod tests {
     }
 
     #[derive(Clone, Default)]
+    #[cfg(target_has_atomic = "64")]
     struct Counter(Arc<AtomicU64>);
 
+    #[cfg(target_has_atomic = "64")]
     impl MakeRequestId for Counter {
         fn make_request_id<B>(&mut self, _request: &Request<B>) -> Option<RequestId> {
             let id =
